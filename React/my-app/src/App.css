@@ -1,126 +1,862 @@
-
 .app-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 40px auto;
-  padding: 30px;
-  background-color: #51dc97; 
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px;
+  background: linear-gradient(135deg, #04035b 0%, #ea580c 100%);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+.app-container::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(30px);
+  }
+}
+
+/* Money Bag Icon Fix */
 .app-container h1 {
   text-align: center;
-  font-size: 2.5rem;
-  color: #333333;
-  margin-bottom: 10px;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #ffffff, #e0e7ff);
+  -webkit-background-clip: text;
+  color: white;
+  background-clip: text;
+  margin-bottom: 8px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  letter-spacing: -1px;
+  animation: slideInDown 0.5s ease-out;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .app-container h2 {
   text-align: center;
-  font-size: 1.8rem;
-  color: #444444;
-  margin-bottom: 25px;
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 35px;
+  font-weight: 500;
+  animation: fadeIn 0.8s ease-out 0.2s backwards;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .transaction-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.5s ease-out 0.3s backwards;
+  position: relative;
+  z-index: 1;
 }
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .transaction-form input,
 .transaction-form select {
-  padding: 10px 15px;
+  padding: 14px 18px;
   font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #cccccc;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.98);
   outline: none;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #1e293b;
+  font-weight: 500;
+  min-width: 180px;
+  flex: 1 1 auto;
 }
+
+.transaction-form input::placeholder {
+  color: #94a3b8;
+}
+
+.transaction-form select {
+  cursor: pointer;
+}
+
 .transaction-form input:focus,
 .transaction-form select:focus {
-  border-color: #ff8c00;
-  box-shadow: 0 0 8px rgba(255, 140, 0, 0.3);
+  border-color: #60a5fa;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+  transform: translateY(-2px);
+  animation: pulse 0.5s ease-out;
 }
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+  }
+}
+
 .transaction-form button {
-  background: linear-gradient(45deg, #ff6ec4, #7873f5, #42f5b3);
-  color: white;
-  font-weight: bold;
+  background: linear-gradient(135deg, #f52e0b 0%, #0c86ea 100%);
+  color: #ffffff;
+  font-weight: 700;
   border: none;
-  padding: 10px 20px;
+  padding: 14px 32px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(11, 214, 245, 0.5);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
 }
+
+.transaction-form button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.transaction-form button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
 .transaction-form button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(11, 233, 245, 0.6);
+  background: linear-gradient(135deg, #0ceaea 0%, #2926dc 100%);
 }
+
+.transaction-form button:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
 .transaction-list {
-  margin-top: 30px;
+  margin-top: 35px;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.8s ease-out 0.5s backwards;
 }
+
 .transaction-list h3 {
   text-align: center;
-  margin-bottom: 15px;
-  color: #222222;
-  font-weight: bold;
+  margin-bottom: 20px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.6rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
 .transaction-list ul {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
 .transaction-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  padding: 18px 22px;
+  border-radius: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 10px;
+  animation: slideInLeft 0.5s ease-out backwards;
 }
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.transaction-list li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  transition: width 0.3s ease;
+  background-color: #0bf526;
+}
+
+.transaction-list li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(231, 7, 7, 0.15) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 .income {
-  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(22, 163, 74, 0.95) 100%);
   color: #ffffff;
 }
+
+.income::before {
+  background: #4ade80;
+}
+
 .expense {
-  background: linear-gradient(90deg, #ff416c, #ff4b2b);
-  color: #ffffff; 
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
+  color: #ffffff;
+}
+
+.expense::before {
+  background: #f87171;
+}
+
+.transaction-list li:hover::before {
+  width: 8px;
+}
+
+.transaction-list li:hover::after {
+  opacity: 1;
 }
 
 .transaction-list .description {
-  color: #f0f0f0; 
-}
-
-.transaction-list .income span {
-  color: #cceeff;
-}
-
-.transaction-list .expense span {
-  color: #ffd6d6;
-}
-.transaction-list button {
-  background: #bb2929;
-  color: #faf8f8;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-.transaction-list button:hover {
-  transform: scale(1.1);
-  background: #c53e26;
   color: #ffffff;
+  font-size: 1.05rem;
+  flex: 1 1 200px;
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+/* Emoji icons for transactions */
+.income .description::before {
+  content: '💵';
+  font-size: 1.6rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  animation: rotateIn 0.5s ease-out;
+  line-height: 1;
+}
+
+.expense .description::before {
+  content: '💸';
+  font-size: 1.6rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  animation: rotateIn 0.5s ease-out;
+  line-height: 1;
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+.transaction-list .income span,
+.transaction-list .expense span {
+  color: rgba(255, 255, 255, 0.98);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 15px;
+  white-space: nowrap;
+  animation: fadeIn 0.5s ease-out 0.2s backwards;
+}
+
+.transaction-list button {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(5px);
+  position: relative;
+}
+
+.transaction-list button::after {
+  content: '🗑️';
+  font-size: 0;
+  transition: font-size 0.3s ease;
+  line-height: 1;
+}
+
+.transaction-list button:hover::after {
+  font-size: 1rem;
+}
+
+.transaction-list button:hover {
+  transform: scale(1.1) rotate(-5deg);
+  background: rgba(239, 68, 68, 0.9);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg) scale(1.1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  75% { transform: rotate(5deg) scale(1.1); }
+}
+
+.transaction-list button:active {
+  transform: scale(0.95);
+  animation: explode 0.5s ease-out;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
 .dashboard-container {
   display: flex;
-  gap: 50px;
+  gap: 20px;
   flex-wrap: wrap;
   justify-content: space-between;
+  margin-top: 25px;
 }
+
 .transaction-list li:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth scrollbar */
+.transaction-list ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.transaction-list ul::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.transaction-list ul::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.transaction-list ul::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Loading animation for new items */
+@keyframes itemAdded {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+  50% {
+    transform: translateY(5px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Add this class to new items via JavaScript */
+.transaction-list li.new-item {
+  animation: itemAdded 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===============================================
+   RESPONSIVE DESIGN - TABLET & MOBILE (IMPROVED)
+   =============================================== */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+  .app-container {
+    max-width: 90%;
+    padding: 35px 25px;
+    margin: 25px auto;
+  }
+  
+  .app-container h1 {
+    font-size: 2.6rem;
+    gap: 12px;
+  }
+  
+  .app-container h2 {
+    font-size: 1.3rem;
+  }
+  
+  .transaction-form {
+    padding: 22px 20px;
+    gap: 10px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select {
+    min-width: 160px;
+    font-size: 0.98rem;
+  }
+  
+  .transaction-form button {
+    min-width: 100%;
+    margin-top: 5px;
+  }
+  
+  .transaction-list h3 {
+    font-size: 1.5rem;
+  }
+  
+  .transaction-list li {
+    padding: 16px 20px;
+  }
+}
+
+/* Mobile - Large (481px - 768px) */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 25px 18px;
+    margin: 18px 12px;
+    border-radius: 20px;
+  }
+  
+  .app-container h1 {
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .app-container h2 {
+    font-size: 1.25rem;
+    margin-bottom: 28px;
+    padding: 0 10px;
+  }
+  
+  .transaction-form {
+    padding: 18px 15px;
+    gap: 10px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select {
+    min-width: 100%;
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 0.96rem;
+  }
+  
+  .transaction-form button {
+    width: 100%;
+    padding: 13px 20px;
+    font-size: 0.96rem;
+    margin-top: 5px;
+  }
+  
+  .transaction-list h3 {
+    font-size: 1.45rem;
+    margin-bottom: 18px;
+  }
+  
+  .transaction-list li {
+    padding: 14px 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .transaction-list .description {
+    font-size: 1rem;
+    flex: 1 1 calc(100% - 120px);
+    min-width: 120px;
+  }
+  
+  .income .description::before,
+  .expense .description::before {
+    font-size: 1.5rem;
+  }
+  
+  .transaction-list .income span,
+  .transaction-list .expense span {
+    font-size: 1.05rem;
+    margin: 0 8px;
+  }
+  
+  .transaction-list button {
+    font-size: 0.88rem;
+    padding: 7px 11px;
+  }
+  
+  .transaction-list li:hover {
+    transform: translateX(6px) scale(1.015);
+  }
+}
+
+/* Mobile - Medium (376px - 480px) */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 20px 14px;
+    margin: 14px 8px;
+    border-radius: 18px;
+  }
+  
+  .app-container h1 {
+    font-size: 1.85rem;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .app-container h2 {
+    font-size: 1.15rem;
+    margin-bottom: 22px;
+  }
+  
+  .transaction-form {
+    padding: 16px 12px;
+    gap: 9px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select,
+  .transaction-form button {
+    font-size: 0.92rem;
+    padding: 12px 14px;
+  }
+  
+  .transaction-list h3 {
+    font-size: 1.35rem;
+  }
+  
+  .transaction-list li {
+    padding: 13px 14px;
+    gap: 8px;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .transaction-list .description {
+    font-size: 0.96rem;
+    flex: 1 1 100%;
+    min-width: 100%;
+    order: 1;
+  }
+  
+  .income .description::before,
+  .expense .description::before {
+    font-size: 1.4rem;
+  }
+  
+  .transaction-list .income span,
+  .transaction-list .expense span {
+    font-size: 1rem;
+    margin: 0;
+    order: 2;
+    flex: 1 1 auto;
+  }
+  
+  .transaction-list button {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    order: 3;
+    margin-top: 5px;
+  }
+}
+
+/* Mobile - Small (320px - 375px) */
+@media (max-width: 375px) {
+  .app-container {
+    padding: 18px 12px;
+    margin: 12px 6px;
+    border-radius: 16px;
+  }
+  
+  .app-container h1 {
+    font-size: 1.65rem;
+  }
+  
+  .app-container h2 {
+    font-size: 1.08rem;
+    margin-bottom: 20px;
+  }
+  
+  .transaction-form {
+    padding: 14px 10px;
+    gap: 8px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select,
+  .transaction-form button {
+    font-size: 0.9rem;
+    padding: 11px 13px;
+  }
+  
+  .transaction-list h3 {
+    font-size: 1.25rem;
+  }
+  
+  .transaction-list li {
+    padding: 12px 13px;
+  }
+  
+  .transaction-list .description {
+    font-size: 0.92rem;
+  }
+  
+  .income .description::before,
+  .expense .description::before {
+    font-size: 1.3rem;
+  }
+  
+  .transaction-list .income span,
+  .transaction-list .expense span {
+    font-size: 0.96rem;
+  }
+  
+  .transaction-list button {
+    font-size: 0.82rem;
+    padding: 5px 9px;
+  }
+}
+
+/* Mobile - Extra Small (<320px) */
+@media (max-width: 320px) {
+  .app-container {
+    padding: 15px 10px;
+    margin: 10px 4px;
+  }
+  
+  .app-container h1 {
+    font-size: 1.5rem;
+  }
+  
+  .app-container h2 {
+    font-size: 1rem;
+  }
+  
+  .transaction-form {
+    padding: 12px 8px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select,
+  .transaction-form button {
+    font-size: 0.88rem;
+    padding: 10px 12px;
+  }
+  
+  .transaction-list h3 {
+    font-size: 1.18rem;
+  }
+  
+  .transaction-list li {
+    padding: 11px 12px;
+  }
+  
+  .transaction-list .description {
+    font-size: 0.9rem;
+  }
+  
+  .income .description::before,
+  .expense .description::before {
+    font-size: 1.2rem;
+  }
+  
+  .transaction-list .income span,
+  .transaction-list .expense span {
+    font-size: 0.92rem;
+  }
+}
+
+/* Landscape mode for phones */
+@media (max-width: 900px) and (orientation: landscape) {
+  .app-container {
+    margin: 15px auto;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 20px 25px;
+  }
+  
+  .app-container h1 {
+    font-size: 1.9rem;
+    margin-bottom: 8px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  
+  .app-container h2 {
+    font-size: 1.15rem;
+    margin-bottom: 18px;
+  }
+  
+  .transaction-form {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 15px 18px;
+    gap: 8px;
+  }
+  
+  .transaction-form input,
+  .transaction-form select {
+    flex: 1 1 calc(25% - 8px);
+    min-width: 140px;
+  }
+  
+  .transaction-form button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 150px;
+  }
+  
+  .transaction-list li {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  
+  .transaction-list .description {
+    flex: 1 1 auto;
+  }
+}
+
+/* High-resolution displays (Retina) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .transaction-list .description::before,
+  .income .description::before,
+  .expense .description::before {
+    transform: scale(0.95);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -2,7 +2,7 @@ import React from "react";
 const TransactionList = ({ transactions, onDeleteTransaction }) => {
   return (
     <div className="transaction-list">
-      <h3>Transactions</h3>
+      <h3>Transactions History</h3>
       {transactions.length === 0 ? (
         <p>No transactions yet.</p>
       ) : (
@@ -13,7 +13,7 @@ const TransactionList = ({ transactions, onDeleteTransaction }) => {
               <span>
                 {t.type === "INCOME" ? ` +₹${t.amount}` : ` -₹${t.amount}`}
               </span>
-              <button onClick={() => onDeleteTransaction(t.id)}>Delete</button>
+            <button onClick={() => onDeleteTransaction(t.id)}>Delete</button>
             </li>
           ))}
         </ul>
