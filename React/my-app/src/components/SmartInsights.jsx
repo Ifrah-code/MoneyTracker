@@ -1,120 +1,359 @@
 import { useState } from "react";
 
-// Current 2026 Model Endpoint
-const MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
 const API_KEY = "AIzaSyCS7F1i5tabhXuWfx30uuZ-dphZDmk_ILI";
 
 const SmartInsights = ({ transactions }) => {
-  const [insights, setInsights] = useState(null);
+  const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [usingAI, setUsingAI] = useState(true);
 
-  // Financial Calculations
+
   const totalIncome = transactions?.filter(t => t.type === "INCOME").reduce((acc, t) => acc + t.amount, 0) || 0;
   const totalExpense = transactions?.filter(t => t.type === "EXPENSE").reduce((acc, t) => acc + t.amount, 0) || 0;
   const savings = totalIncome - totalExpense;
-  const savingsRate = totalIncome > 0 ? ((savings / totalIncome) * 100).toFixed(1) : 0;
 
-  const getInsights = async () => {
-    if (!transactions || transactions.length === 0) {
-      setError("Add some transactions first to get AI insights!");
+  
+  const getBaseAlert = () => {
+    if (savings >= 50000) {
+      return {
+        type: "success",
+        icon: "🎉",
+        title: "Excellent Financial Health!",
+        baseMessage: `Amazing! You have ₹${savings.toLocaleString()} in savings. Keep up the great work!`,
+        tip: "Consider investing some of your savings for better returns.",
+        color: "#22c55e",
+        bg: "rgba(34, 197, 94, 0.15)",
+        border: "rgba(34, 197, 94, 0.4)"
+      };
+    } else if (savings >= 20000) {
+      return {
+        type: "warning",
+        icon: "⚠️",
+        title: "Moderate Savings",
+        baseMessage: `You have ₹${savings.toLocaleString()} saved. Try to save more to reach ₹50,000 for better financial security.`,
+        tip: "Try the 50/30/20 rule - 50% needs, 30% wants, 20% savings.",
+        color: "#f59e0b",
+        bg: "rgba(245, 158, 11, 0.15)",
+        border: "rgba(245, 158, 11, 0.4)"
+      };
+    } else if (savings >= 0) {
+      return {
+        type: "danger",
+        icon: "🚨",
+        title: "Low Savings Alert!",
+        baseMessage: `Your savings are only ₹${savings.toLocaleString()}. Consider reducing expenses to build an emergency fund.`,
+        tip: "Review your expenses and cut non-essential spending immediately.",
+        color: "#ef4444",
+        bg: "rgba(239, 68, 68, 0.15)",
+        border: "rgba(239, 68, 68, 0.4)"
+      };
+    } else {
+      return {
+        type: "critical",
+        icon: "💸",
+        title: "Critical! Negative Balance",
+        baseMessage: `You're spending ₹${Math.abs(savings).toLocaleString()} more than you earn! Urgent action needed.`,
+        tip: "Create a strict budget and eliminate unnecessary expenses now.",
+        color: "#dc2626",
+        bg: "rgba(220, 38, 38, 0.2)",
+        border: "rgba(220, 38, 38, 0.5)"
+      };
+    }
+  };
+
+  const getAIInsights = async () => {
+    if (transactions.length === 0) {
+      setAlert({
+        ...getBaseAlert(),
+        aiMessage: null,
+        message: "Add some transactions first to get insights!"
+      });
       return;
     }
 
     setLoading(true);
-    setError(null);
-
-    const summaryStr = transactions.map(t => `${t.type}: ${t.description} - Rs.${t.amount}`).join("\n");
-    const prompt = `Act as a finance advisor. Analyze: ${summaryStr}. 
-    Summary: Income Rs.${totalIncome}, Exp Rs.${totalExpense}, Sav Rs.${savings}, Rate ${savingsRate}%.
-    Return ONLY JSON: {"score": 75, "scoreLabel": "Good", "insights": [{"type": "tip", "title": "Title", "message": "Msg"}], "summary": "One sentence summary."}`;
+    const baseAlert = getBaseAlert();
 
     try {
+      
+      const topExpenses = transactions
+        .filter(t => t.type === "EXPENSE")
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 3)
+        .map(t => `${t.description}: ₹${t.amount}`)
+        .join(", ");
+
+      const prompt = `You are a friendly financial advisor. Analyze this data:
+
+Income: ₹${totalIncome}
+Expenses: ₹${totalExpense}
+Savings: ₹${savings}
+Status: ${baseAlert.type}
+Top expenses: ${topExpenses}
+
+Give ONE personalized sentence of advice (max 20 words) based on their ${baseAlert.type} status. Be encouraging, specific, and actionable. Do NOT use emojis.`;
+
       const response = await fetch(`${MODEL_URL}?key=${API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 80
+          }
+        }),
       });
 
-      if (!response.ok) throw new Error("API Busy. Please click again.");
+      if (!response.ok) throw new Error("API failed");
 
       const data = await response.json();
-      const rawText = data.candidates[0].content.parts[0].text;
-      const jsonStr = rawText.replace(/```json|```/g, "").trim();
-      setInsights(JSON.parse(jsonStr));
+      const aiAdvice = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+      if (aiAdvice) {
+        setAlert({
+          ...baseAlert,
+          aiMessage: aiAdvice,
+          message: aiAdvice
+        });
+        setUsingAI(true);
+      } else {
+        throw new Error("No AI response");
+      }
+
     } catch (err) {
-      setError("Failed to reach Gemini AI. Try again.");
+      console.log("AI failed, using fallback:", err.message);
+      setAlert({
+        ...baseAlert,
+        aiMessage: null,
+        message: baseAlert.baseMessage
+      });
+      setUsingAI(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const typeConfig = {
-    tip: { icon: "💡", color: "#3b82f6", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.3)" },
-    warning: { icon: "⚠️", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.3)" },
-    positive: { icon: "✅", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.3)" },
-    alert: { icon: "🚨", color: "#ef4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.3)" },
-  };
-
-  const scoreColor = (s) => s >= 75 ? "#22c55e" : s >= 50 ? "#f59e0b" : "#ef4444";
-
   return (
-    <div style={{ marginTop: "30px", background: "rgba(255,255,255,0.07)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "24px", padding: "28px" }}>
+    <div style={{
+      marginTop: "30px",
+      background: "rgba(255,255,255,0.08)",
+      backdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.2)",
+      borderRadius: "20px",
+      padding: "25px",
+      boxSizing: "border-box"
+    }}>
       
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
-        <div>
-          <h3 style={{ margin: 0, color: "#fff", fontSize: "1.4rem" }}>🤖 AI Insights</h3>
-        </div>
-        <button onClick={getInsights} disabled={loading} style={{ background: "#6366f1", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "12px", fontWeight: "bold", cursor: "pointer" }}>
-          {loading ? "Analyzing..." : "✨ Get Insights"}
+     
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "20px",
+        flexWrap: "wrap",
+        gap: "10px"
+      }}>
+        <h3 style={{ margin: 0, color: "#fff", fontSize: "1.5rem" }}>
+          🤖 AI Financial Insights
+        </h3>
+        <button 
+          onClick={getAIInsights}
+          disabled={loading || transactions.length === 0}
+          style={{
+            background: loading ? "#6b7280" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            color: "#fff",
+            border: "none",
+            padding: "12px 24px",
+            borderRadius: "12px",
+            fontWeight: "bold",
+            cursor: loading || transactions.length === 0 ? "not-allowed" : "pointer",
+            fontSize: "0.95rem",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)"
+          }}
+        >
+          {loading ? "🔄 AI Analyzing..." : "✨ Get AI Insights"}
         </button>
       </div>
 
-      {/* Stats Row with Savings Percentage */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-        {[
-          { label: "Income", val: `₹${totalIncome.toLocaleString()}`, col: "#22c55e" },
-          { label: "Expenses", val: `₹${totalExpense.toLocaleString()}`, col: "#ef4444" },
-          { label: "Savings", val: `₹${savings.toLocaleString()}`, col: savings >= 0 ? "#22c55e" : "#ef4444" },
-          { label: "Savings Rate", val: `${savingsRate}%`, col: savingsRate >= 20 ? "#22c55e" : "#f59e0b" }
-        ].map(s => (
-          <div key={s.label} style={{ flex: "1 1 120px", background: "rgba(255,255,255,0.05)", padding: "12px", borderRadius: "12px", textAlign: "center", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ color: s.col, fontWeight: "800", fontSize: "1rem" }}>{s.val}</div>
-            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem", marginTop: "4px" }}>{s.label}</div>
+      {/* Quick Stats */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+        gap: "12px",
+        marginBottom: "20px"
+      }}>
+        <div style={{
+          background: "rgba(34, 197, 94, 0.1)",
+          border: "1px solid rgba(34, 197, 94, 0.3)",
+          padding: "15px",
+          borderRadius: "12px",
+          textAlign: "center"
+        }}>
+          <div style={{ color: "#22c55e", fontWeight: "800", fontSize: "1.3rem" }}>
+            ₹{totalIncome.toLocaleString()}
           </div>
-        ))}
+          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
+            Total Income
+          </div>
+        </div>
+
+        <div style={{
+          background: "rgba(239, 68, 68, 0.1)",
+          border: "1px solid rgba(239, 68, 68, 0.3)",
+          padding: "15px",
+          borderRadius: "12px",
+          textAlign: "center"
+        }}>
+          <div style={{ color: "#ef4444", fontWeight: "800", fontSize: "1.3rem" }}>
+            ₹{totalExpense.toLocaleString()}
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
+            Total Expenses
+          </div>
+        </div>
+
+        <div style={{
+          background: savings >= 0 ? "rgba(34, 197, 94, 0.1)" : "rgba(239, 68, 68, 0.1)",
+          border: savings >= 0 ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(239, 68, 68, 0.3)",
+          padding: "15px",
+          borderRadius: "12px",
+          textAlign: "center"
+        }}>
+          <div style={{ color: savings >= 0 ? "#22c55e" : "#ef4444", fontWeight: "800", fontSize: "1.3rem" }}>
+            {savings >= 0 ? "+" : ""}₹{savings.toLocaleString()}
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
+            Savings
+          </div>
+        </div>
       </div>
 
-      {error && <div style={{ color: "#fca5a5", textAlign: "center", padding: "10px" }}>{error}</div>}
+      
+      {loading && (
+        <div style={{
+          padding: "30px 20px",
+          textAlign: "center",
+          background: "rgba(99, 102, 241, 0.1)",
+          border: "1px solid rgba(99, 102, 241, 0.3)",
+          borderRadius: "16px",
+          color: "#a78bfa"
+        }}>
+          <div style={{ fontSize: "2.5rem", marginBottom: "10px" }}>🤖</div>
+          <div style={{ fontSize: "1rem", fontWeight: "600" }}>
+            AI is analyzing your finances...
+          </div>
+          <div style={{ fontSize: "0.85rem", marginTop: "5px", opacity: 0.7 }}>
+            This may take a few seconds
+          </div>
+        </div>
+      )}
 
-      {/* AI Analysis Result */}
-      {insights && !loading && (
-        <>
-          <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "16px", padding: "20px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "15px", border: `1px solid ${scoreColor(insights.score)}55` }}>
-            <div style={{ width: "50px", height: "50px", borderRadius: "50%", border: `3px solid ${scoreColor(insights.score)}`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", color: scoreColor(insights.score) }}>{insights.score}</div>
-            <div>
-              <div style={{ fontWeight: "800", color: scoreColor(insights.score) }}>{insights.scoreLabel} Financial Health</div>
-              <div style={{ fontSize: "0.85rem", opacity: 0.7 }}>{insights.summary}</div>
+     
+      {alert && !loading && (
+        <div style={{
+          background: alert.bg,
+          border: `2px solid ${alert.border}`,
+          borderRadius: "16px",
+          padding: "20px 24px",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "16px",
+          animation: "slideIn 0.4s ease-out",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{ fontSize: "2.5rem", flexShrink: 0, lineHeight: 1 }}>
+            {alert.icon}
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ 
+              margin: "0 0 8px 0", 
+              color: alert.color, 
+              fontSize: "1.2rem",
+              fontWeight: "700"
+            }}>
+              {alert.title}
+            </h4>
+            
+           
+            <p style={{ 
+              margin: "0 0 12px 0", 
+              color: "rgba(255,255,255,0.95)", 
+              fontSize: "1.05rem",
+              lineHeight: "1.6",
+              fontWeight: "500"
+            }}>
+              {alert.message}
+            </p>
+
+           
+            {usingAI && alert.aiMessage && (
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "rgba(99, 102, 241, 0.2)",
+                border: "1px solid rgba(99, 102, 241, 0.4)",
+                padding: "4px 10px",
+                borderRadius: "20px",
+                fontSize: "0.75rem",
+                color: "#a78bfa",
+                fontWeight: "600",
+                marginBottom: "12px"
+              }}>
+                <span>🤖</span> AI-Powered Advice
+              </div>
+            )}
+
+      
+            <div style={{
+              marginTop: "12px",
+              paddingTop: "12px",
+              borderTop: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ 
+                fontSize: "0.9rem", 
+                color: "rgba(255,255,255,0.8)",
+                lineHeight: "1.6"
+              }}>
+                <strong>💡 Tip:</strong> {alert.tip}
+              </div>
             </div>
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {insights.insights.map((ins, i) => {
-              const conf = typeConfig[ins.type] || typeConfig.tip;
-              return (
-                <div key={i} style={{ background: conf.bg, border: `1px solid ${conf.border}`, borderRadius: "14px", padding: "15px", display: "flex", gap: "12px" }}>
-                  <span style={{ fontSize: "1.2rem" }}>{conf.icon}</span>
-                  <div>
-                    <div style={{ color: conf.color, fontWeight: "700", fontSize: "0.9rem" }}>{ins.title}</div>
-                    <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.85rem" }}>{ins.message}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
+        </div>
       )}
+
+      {!alert && !loading && (
+        <div style={{
+          textAlign: "center",
+          color: "rgba(255,255,255,0.5)",
+          padding: "40px 20px",
+          fontSize: "0.95rem"
+        }}>
+          <div style={{ fontSize: "3.5rem", marginBottom: "15px" }}>🤖</div>
+          <p style={{ margin: "0 0 10px 0", fontSize: "1.1rem", color: "rgba(255,255,255,0.7)" }}>
+            Ready for AI-powered financial insights?
+          </p>
+          <p style={{ margin: 0 }}>
+            Our AI will analyze your spending and give personalized advice
+          </p>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };

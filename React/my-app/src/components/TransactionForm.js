@@ -20,21 +20,21 @@ const TransactionForm = ({ onAddTransaction }) => {
     setType("income");
   };
 
-  // Shared style to force all inputs to be identical
+  
   const inputStyle = {
     width: "100%",
-    height: "50px", // Fixed height for all
+    height: "50px", 
     padding: "12px",
     borderRadius: "10px",
     border: "1px solid rgba(255,255,255,0.2)",
     marginBottom: "10px",
-    boxSizing: "border-box", // Essential to prevent width overflow
+    boxSizing: "border-box", 
     fontSize: "1rem"
   };
 
   return (
     <form onSubmit={handleSubmit} className="transaction-form" style={{ padding: "10px" }}>
-      {/* Ensuring visual consistency across all form elements */}
+      
       <input
         type="text"
         placeholder="Enter description"
