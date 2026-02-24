@@ -1,19 +1,17 @@
 import { useState } from "react";
 
-const MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
-const API_KEY = "AIzaSyCS7F1i5tabhXuWfx30uuZ-dphZDmk_ILI";
+const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_API_KEY = "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"; // Replace with your OpenAI API key
 
 const SmartInsights = ({ transactions }) => {
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
   const [usingAI, setUsingAI] = useState(true);
 
-
   const totalIncome = transactions?.filter(t => t.type === "INCOME").reduce((acc, t) => acc + t.amount, 0) || 0;
   const totalExpense = transactions?.filter(t => t.type === "EXPENSE").reduce((acc, t) => acc + t.amount, 0) || 0;
   const savings = totalIncome - totalExpense;
 
-  
   const getBaseAlert = () => {
     if (savings >= 50000) {
       return {
@@ -76,7 +74,6 @@ const SmartInsights = ({ transactions }) => {
     const baseAlert = getBaseAlert();
 
     try {
-      
       const topExpenses = transactions
         .filter(t => t.type === "EXPENSE")
         .sort((a, b) => b.amount - a.amount)
@@ -94,22 +91,33 @@ Top expenses: ${topExpenses}
 
 Give ONE personalized sentence of advice (max 20 words) based on their ${baseAlert.type} status. Be encouraging, specific, and actionable. Do NOT use emojis.`;
 
-      const response = await fetch(`${MODEL_URL}?key=${API_KEY}`, {
+      const response = await fetch(OPENAI_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.8,
-            maxOutputTokens: 80
-          }
+          model: "gpt-3.5-turbo", // or "gpt-4" for better results
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful financial advisor who gives concise, actionable advice."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 50,
+          temperature: 0.7
         }),
       });
 
       if (!response.ok) throw new Error("API failed");
 
       const data = await response.json();
-      const aiAdvice = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      const aiAdvice = data.choices?.[0]?.message?.content?.trim();
 
       if (aiAdvice) {
         setAlert({
@@ -146,7 +154,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
       boxSizing: "border-box"
     }}>
       
-     
+      {/* Header */}
       <div style={{
         display: "flex",
         justifyContent: "space-between",
@@ -162,7 +170,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
           onClick={getAIInsights}
           disabled={loading || transactions.length === 0}
           style={{
-            background: loading ? "#6b7280" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            background: loading ? "#6b7280" : "linear-gradient(135deg, #10a37f, #1a7f64)",
             color: "#fff",
             border: "none",
             padding: "12px 24px",
@@ -171,10 +179,10 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
             cursor: loading || transactions.length === 0 ? "not-allowed" : "pointer",
             fontSize: "0.95rem",
             transition: "all 0.3s ease",
-            boxShadow: "0 4px 15px rgba(99, 102, 241, 0.3)"
+            boxShadow: "0 4px 15px rgba(16, 163, 127, 0.3)"
           }}
         >
-          {loading ? "🔄 AI Analyzing..." : "✨ Get AI Insights"}
+          {loading ? "🔄 ChatGPT Analyzing..." : "✨ Get ChatGPT Insights"}
         </button>
       </div>
 
@@ -192,7 +200,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
           borderRadius: "12px",
           textAlign: "center"
         }}>
-          <div style={{ color: "#22c55e", fontWeight: "800", fontSize: "1.3rem" }}>
+          <div style={{ color: "#022b03", fontWeight: "800", fontSize: "1.3rem" }}>
             ₹{totalIncome.toLocaleString()}
           </div>
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
@@ -207,7 +215,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
           borderRadius: "12px",
           textAlign: "center"
         }}>
-          <div style={{ color: "#ef4444", fontWeight: "800", fontSize: "1.3rem" }}>
+          <div style={{ color: "#330e04", fontWeight: "800", fontSize: "1.3rem" }}>
             ₹{totalExpense.toLocaleString()}
           </div>
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
@@ -222,7 +230,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
           borderRadius: "12px",
           textAlign: "center"
         }}>
-          <div style={{ color: savings >= 0 ? "#22c55e" : "#ef4444", fontWeight: "800", fontSize: "1.3rem" }}>
+          <div style={{ color: savings >= 0 ? "#022b03" : "#ef4444", fontWeight: "800", fontSize: "1.3rem" }}>
             {savings >= 0 ? "+" : ""}₹{savings.toLocaleString()}
           </div>
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem", marginTop: "4px" }}>
@@ -231,19 +239,19 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       </div>
 
-      
+      {/* Loading State */}
       {loading && (
         <div style={{
           padding: "30px 20px",
           textAlign: "center",
-          background: "rgba(99, 102, 241, 0.1)",
-          border: "1px solid rgba(99, 102, 241, 0.3)",
+          background: "rgba(16, 163, 127, 0.1)",
+          border: "1px solid rgba(16, 163, 127, 0.3)",
           borderRadius: "16px",
-          color: "#a78bfa"
+          color: "#10a37f"
         }}>
           <div style={{ fontSize: "2.5rem", marginBottom: "10px" }}>🤖</div>
           <div style={{ fontSize: "1rem", fontWeight: "600" }}>
-            AI is analyzing your finances...
+            ChatGPT is analyzing your finances...
           </div>
           <div style={{ fontSize: "0.85rem", marginTop: "5px", opacity: 0.7 }}>
             This may take a few seconds
@@ -251,7 +259,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       )}
 
-     
+      {/* Alert Display */}
       {alert && !loading && (
         <div style={{
           background: alert.bg,
@@ -277,7 +285,6 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
               {alert.title}
             </h4>
             
-           
             <p style={{ 
               margin: "0 0 12px 0", 
               color: "rgba(255,255,255,0.95)", 
@@ -288,26 +295,25 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
               {alert.message}
             </p>
 
-           
+            {/* ChatGPT Badge */}
             {usingAI && alert.aiMessage && (
               <div style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                background: "rgba(99, 102, 241, 0.2)",
-                border: "1px solid rgba(99, 102, 241, 0.4)",
+                background: "rgba(16, 163, 127, 0.2)",
+                border: "1px solid rgba(16, 163, 127, 0.4)",
                 padding: "4px 10px",
                 borderRadius: "20px",
                 fontSize: "0.75rem",
-                color: "#a78bfa",
+                color: "#10a37f",
                 fontWeight: "600",
                 marginBottom: "12px"
               }}>
-                <span>🤖</span> AI-Powered Advice
+                <span>🤖</span> ChatGPT-Powered Advice
               </div>
             )}
 
-      
             <div style={{
               marginTop: "12px",
               paddingTop: "12px",
@@ -325,6 +331,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       )}
 
+      {/* Empty State */}
       {!alert && !loading && (
         <div style={{
           textAlign: "center",
@@ -334,10 +341,10 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         }}>
           <div style={{ fontSize: "3.5rem", marginBottom: "15px" }}>🤖</div>
           <p style={{ margin: "0 0 10px 0", fontSize: "1.1rem", color: "rgba(255,255,255,0.7)" }}>
-            Ready for AI-powered financial insights?
+            Ready for ChatGPT-powered financial insights?
           </p>
           <p style={{ margin: 0 }}>
-            Our AI will analyze your spending and give personalized advice
+            ChatGPT will analyze your spending and give personalized advice
           </p>
         </div>
       )}
