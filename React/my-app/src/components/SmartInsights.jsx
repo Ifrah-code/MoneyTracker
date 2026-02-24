@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const OPENAI_API_KEY = "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"; // Replace with your OpenAI API key
 
 const SmartInsights = ({ transactions }) => {
   const [alert, setAlert] = useState(null);
