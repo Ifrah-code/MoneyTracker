@@ -94,10 +94,9 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENAI_API_KEY}`
-        },
+"Authorization": `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`        },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo", // or "gpt-4" for better results
+          model: "gpt-3.5-turbo", 
           messages: [
             {
               role: "system",
@@ -153,7 +152,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
       boxSizing: "border-box"
     }}>
       
-      {/* Header */}
+      
       <div style={{
         display: "flex",
         justifyContent: "space-between",
@@ -185,7 +184,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </button>
       </div>
 
-      {/* Quick Stats */}
+      
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
@@ -238,7 +237,6 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       </div>
 
-      {/* Loading State */}
       {loading && (
         <div style={{
           padding: "30px 20px",
@@ -258,7 +256,7 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       )}
 
-      {/* Alert Display */}
+      
       {alert && !loading && (
         <div style={{
           background: alert.bg,
@@ -294,7 +292,6 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
               {alert.message}
             </p>
 
-            {/* ChatGPT Badge */}
             {usingAI && alert.aiMessage && (
               <div style={{
                 display: "inline-flex",
@@ -330,7 +327,6 @@ Give ONE personalized sentence of advice (max 20 words) based on their ${baseAle
         </div>
       )}
 
-      {/* Empty State */}
       {!alert && !loading && (
         <div style={{
           textAlign: "center",
